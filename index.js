@@ -56,6 +56,19 @@ app.delete('/api/persons/:id', (req, res) => {
 
 app.post('/api/persons', (req, res) => {
   const person = req.body
+  
+  if (!person.name || !person.number) {
+    return res.status(400).json({
+      error: 'content missing'
+    })
+  }
+
+  if (phoneBook.some(p => p.name === person.name)) {
+    return res.status(400).json({
+      error: 'name must be unique'
+    })
+  }
+
   person.id = String(Math.floor(Math.random() * 999999999999999))
   phoneBook = phoneBook.concat(person)
 
