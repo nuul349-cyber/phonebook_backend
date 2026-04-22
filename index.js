@@ -47,11 +47,11 @@ app.get('/info', (request, response) => {
   })
 })
 
-app.get('/api/persons/:id', (req, res) => {
-  const personId = req.params.id
+app.get('/api/persons/:id', (request, response) => {
+  const personId = request.params.id
   Person
     .findById(personId)
-    .then(person => res.json(person))
+    .then(person => response.json(person))
 })
 
 app.delete('/api/persons/:id', (req, res) => {
