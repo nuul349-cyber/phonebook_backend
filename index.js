@@ -56,14 +56,10 @@ app.get('/api/persons/:id', (req, res) => {
 
 app.delete('/api/persons/:id', (req, res) => {
   Person
-    .findById(req.params.id)
-    .then(person => {
-      person
-        .deleteOne()
-        .then(query => {
-          console.log(query)
-          res.status(204).end()
-        })
+    .deleteOne({_id:req.params.id})
+    .then(query => {
+      console.log(query)
+      res.status(204).end()
     })
 })
 
