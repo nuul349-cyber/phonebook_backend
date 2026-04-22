@@ -1,5 +1,7 @@
+require('dotenv').config()
 const express = require('express')
 const morgan = require('morgan')
+const Person = require('./models/person')
 const app = express()
 
 app.use(express.static('dist'))
@@ -31,52 +33,55 @@ let phoneBook = [
 ]
 
 app.get('/api/persons', (request, response) => {
-  response.json(phoneBook)
+  Person.find({}).then(persons => {
+    response.json(persons)
+  })
 })
 
 app.get('/info', (request, response) => {
-  response.send(`
-    <p>Phonebook has info for ${phoneBook.length} people</p>
-    <p>${(new Date()).toString()}</p>
-    `)
+  Person.find({}).then(persons => {
+    response.send(`
+      <p>Phonebook has info for ${persons.length} people</p>
+      <p>${(new Date()).toString()}</p>
+      `)
+  })
 })
 
 app.get('/api/persons/:id', (req, res) => {
   const personId = req.params.id
-  const number = phoneBook.find(p => p.id === personId)
-  if (number) {
-    res.json(number)
-  } else {
-    res.status(404).end()
-  }
+  Person
+    .findById(personId)
+    .then(person => res.json(person))
 })
 
 app.delete('/api/persons/:id', (req, res) => {
-  const personId = req.params.id
-  phoneBook = phoneBook.filter(p => p.id !== personId)
-
-  res.status(204).end()
+  Person
+    .findById(req.params.id)
+    .then(person => {
+      person
+        .deleteOne()
+        .then(query => {
+          console.log(query)
+          res.status(204).end()
+        })
+    })
 })
 
-app.post('/api/persons', (req, res) => {
-  const person = req.body
+app.post('/api/persons', (request, response) => {
+  const body = request.body
   
-  if (!person.name || !person.number) {
-    return res.status(400).json({
+  if (!body.name || !body.number) {
+    return response.status(400).json({
       error: 'content missing'
     })
   }
 
-  if (phoneBook.some(p => p.name === person.name)) {
-    return res.status(400).json({
-      error: 'name must be unique'
-    })
-  }
+  const person = new Person({
+    name: body.name,
+    number: body.number,
+  })
 
-  person.id = String(Math.floor(Math.random() * 999999999999999))
-  phoneBook = phoneBook.concat(person)
-
-  res.json(person)
+  person.save().then(savedPerson => response.json(savedPerson))
 })
 
 const unknownEndpoint = (request, response) => {
@@ -85,7 +90,7 @@ const unknownEndpoint = (request, response) => {
 
 app.use(unknownEndpoint)
 
-const PORT = process.env.PORT || 3001
+const PORT = process.env.PORT
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 })
