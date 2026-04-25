@@ -18,14 +18,14 @@ mongoose
 const personSchema = new mongoose.Schema({
   name: {
     type: String,
-    minLength: 3,
+    minLength: [3, 'The minimum length of a name is 3 characters'],
     required: true,
   },
   number: {
     type: String,
     validate: {
       validator: v => /^(?=.{8,})\d{2,3}-\d+$/.test(v),
-      message: props => `${props.value} is not a valid phone number!`
+      message: () => 'A number should be characters long, and start with 2 or 3 numbers, separated by only one -!'
     },
     required: true,
   },
