@@ -7,17 +7,17 @@ const app = express()
 const errorHandler = (error, request, response, next) => {
   console.log(error.message)
   if (error.name === 'CastError') {
-    return response.status(400).send({error:'malformed id'})
+    return response.status(400).send({ error:'malformed id' })
   } else if (error.name === 'ValidationError') {
-    return response.status(400).send({error:error.message})
+    return response.status(400).send({ error:error.message })
   }
   next(error)
 }
 
 app.use(express.static('dist'))
 app.use(express.json())
-morgan.token('data', (req, res) => JSON.stringify(req.body))
-app.use(morgan(":method :url :status :res[content-length] - :response-time ms :data"))
+morgan.token('data', (req) => JSON.stringify(req.body))
+app.use(morgan(':method :url :status :res[content-length] - :response-time ms :data'))
 
 app.get('/api/persons', (request, response) => {
   Person.find({}).then(persons => {
@@ -42,7 +42,7 @@ app.get('/api/persons/:id', (request, response, next) => {
     .catch(error => next(error))
 })
 
-app.delete('/api/persons/:id', (req, res) => {
+app.delete('/api/persons/:id', (req, res, next) => {
   Person
     .findByIdAndDelete(req.params.id)
     .then(result => {
@@ -54,7 +54,7 @@ app.delete('/api/persons/:id', (req, res) => {
 
 app.post('/api/persons', (request, response, next) => {
   const body = request.body
-  
+
   if (!body.name || !body.number) {
     return response.status(400).send({
       error: 'content missing'
@@ -83,7 +83,7 @@ app.put('/api/persons/:id', (request, response, next) => {
       }
 
       return person
-        .updateOne({name, number}, { runValidators: true })
+        .updateOne({ name, number }, { runValidators: true })
         .then(result => {
           return response.json(result)
         })
