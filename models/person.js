@@ -25,7 +25,7 @@ const personSchema = new mongoose.Schema({
     type: String,
     validate: {
       validator: v => /^(?=.{8,})\d{2,3}-\d+$/.test(v),
-      message: () => 'A number should be characters long, and start with 2 or 3 numbers, separated by only one -!'
+      message: () => 'A number should be 8 characters long, and start with 2 or 3 numbers, separated by only one -!'
     },
     required: true,
   },

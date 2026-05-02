@@ -82,10 +82,13 @@ app.put('/api/persons/:id', (request, response, next) => {
         return response.status(404).end()
       }
 
+      person.name = name
+      person.number = number
+
       return person
-        .updateOne({ name, number }, { runValidators: true })
-        .then(result => {
-          return response.json(result)
+        .save()
+        .then(updatedPerson => {
+          response.json(updatedPerson)
         })
         .catch(error => next(error))
     })
